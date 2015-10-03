@@ -27,14 +27,13 @@
       -
       - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
      -->
-    <script src="popup.js"></script>
   </head>
   <body>
-    <form action="#" method="GET">
+    <form>
       <p>
         検索
         <input type="text" name="keyword" size="40">
-        <input type="submit" value="送信">
+        <input id="button" type="button" value="送信">
       </p>
     </form>
     <div>
@@ -42,6 +41,7 @@
         <td><img src="http://e-village.main.jp/gazou/image_gazou/shun_0009.jpg"></td>
       </table>
     </div>
+    <script src="popup.js"></script>
   </body>
 </html>
 
