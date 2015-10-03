@@ -12,6 +12,7 @@ var ENTRY_POINT='http://atami.kikurage.xyz';
  * Initialize
  */
 window.addEventListener('load', function() {
+  new Clipboard('.stampImage');
   document.querySelector('#button').addEventListener('click', function() {
     var text = document.querySelector("#search").value;
     getImages({"q": text});
@@ -33,6 +34,10 @@ function getImages(query) {
       appendCards(parent, json);
     }).catch(function(err) {
       console.error(err);
+      // TODO: サーバー安定したら削除
+      var parent = document.querySelector('#parent');
+      removeAllChildren(parent);
+      appendCards(parent, ['http://e-village.main.jp/gazou/image_gazou/shun_0009.jpg', 'http://e-village.main.jp/gazou/image_gazou/shun_0008.jpg']);
     });
 }
 
@@ -58,8 +63,10 @@ function appendCards(parent, children) {
   for (var i = 0; i < children.length; i++) {
     var child = document.createElement('img');
 
-    child.src = children[i];
     child.classList.add('stampImage');
+    child.src = children[i];
+    child.dataset.clipboardText = children[i];
+    child.setAttribute('tabindex', 0);
 
     parent.appendChild(child);
   }
