@@ -61,11 +61,12 @@ function core(path, query, method) {
  */
 function appendCards(parent, children) {
   for (var i = 0; i < children.length; i++) {
-    var child = document.createElement('button');
+    var child = document.createElement('img');
 
     child.classList.add('stampImage');
-    child.style.backgroundImage = 'url('+children[i]+')';
+    child.src = children[i];
     child.dataset.clipboardText = children[i];
+    child.setAttribute('tabindex', 0);
 
     parent.appendChild(child);
   }
