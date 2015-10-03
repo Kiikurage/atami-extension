@@ -6,7 +6,7 @@
  -->
 <html>
   <head>
-    <title>Getting Started Extension's Popup</title>
+    <title>Atami</title>
     <style>
       body {
         font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
@@ -30,8 +30,18 @@
     <script src="popup.js"></script>
   </head>
   <body>
-    <div id="status"></div>
-    <img id="image-result" hidden>
+    <form action="#" method="GET">
+      <p>
+        検索
+        <input type="text" name="keyword" size="40">
+        <input type="submit" value="送信">
+      </p>
+    </form>
+    <div>
+      <table>
+        <td><img src="http://e-village.main.jp/gazou/image_gazou/shun_0009.jpg"></td>
+      </table>
+    </div>
   </body>
 </html>
 
