@@ -64,8 +64,8 @@ function appendCards(parent, children) {
     var child = document.createElement('img');
 
     child.classList.add('stampImage');
-    child.src = children[i]["url"];
-    child.dataset.clipboardText = children[i]["url"];
+    child.src = children[i]["proxiedUrl"];
+    child.dataset.clipboardText = children[i]["proxiedUrl"];
     child.setAttribute('tabindex', 0);
 
     parent.appendChild(child);

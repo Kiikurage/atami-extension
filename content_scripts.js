@@ -7,12 +7,26 @@
  * Constants
  */
 var ENTRY_POINT='http://atami.kikurage.xyz';
+var $base = null;
+
+function init() {
+  window.addEventListener('keydown', function(e) {
+    if (e.shiftKey) {
+      if (e.keyCode === 68) {
+        if (!$base) {
+          loadHTML();
+        }
+      }
+    }
+  }, true);
+};
 
 function loadHTML() {
   $.get(chrome.extension.getURL('form.html'))
     .done(function(html){
-      $(html).appendTo(document.body);
-      setupListener()
+      $base = $(html);
+      $base.appendTo(document.body);
+      setupListener();
     });
 };
 
@@ -24,7 +38,7 @@ function setupListener() {
   });
 };
 
-$(loadHTML);
+$(init);
 
 /**********************************************************************
  * API
@@ -68,8 +82,8 @@ function appendCards(parent, children) {
     var child = document.createElement('img');
 
     child.classList.add('stampImage');
-    child.src = children[i]["url"];
-    child.dataset.clipboardText = children[i]["url"];
+    child.src = children[i]["proxiedUrl"];
+    child.dataset.clipboardText = children[i]["proxiedUrl"];
     child.setAttribute('tabindex', 0);
 
     parent.appendChild(child);
