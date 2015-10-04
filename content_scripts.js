@@ -8,16 +8,23 @@
  */
 var ENTRY_POINT='http://atami.kikurage.xyz';
 
-/**
- * Initialize
- */
-window.addEventListener('load', function() {
+function loadHTML() {
+  $.get(chrome.extension.getURL('form.html'))
+    .done(function(html){
+      $(html).appendTo(document.body);
+      setupListener()
+    });
+};
+
+function setupListener() {
   new Clipboard('.stampImage');
   document.querySelector('#button').addEventListener('click', function() {
     var text = document.querySelector("#search").value;
     getImages({"q": text});
   });
-}, false);
+};
+
+$(loadHTML);
 
 /**********************************************************************
  * API
@@ -28,11 +35,11 @@ window.addEventListener('load', function() {
  */
 function getImages(query) {
   core('image/search', query, "GET")
-    .then(function(json) {
+    .done(function(json) {
       var parent = document.querySelector('#parent');
       removeAllChildren(parent);
       appendCards(parent, json);
-    }).catch(function(err) {
+    }).fail(function(err) {
       console.error(err);
       // TODO: サーバー安定したら削除
       var parent = document.querySelector('#parent');
@@ -46,10 +53,7 @@ function getImages(query) {
  */
 function core(path, query, method) {
   var url = generateUrl(path, query);
-  return fetch(url)
-    .then(function(response) {
-      return response.json();
-    })
+  return $.get(url)
 }
 
 /**********************************************************************
