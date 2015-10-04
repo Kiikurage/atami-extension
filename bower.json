@@ -1,0 +1,20 @@
+{
+  "name": "atami-extension",
+  "version": "0.0.0",
+  "homepage": "https://github.com/HakabaV3/atami-extension",
+  "authors": [
+    "tgcshta <annorhtht@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "clipboard": "~1.3.1",
+    "jquery": "~2.1.4"
+  }
+}
