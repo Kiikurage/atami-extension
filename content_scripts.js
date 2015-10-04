@@ -9,14 +9,17 @@
  * Constants
  */
 var $base = null,
-	$search = null;
-var focusedElement = null;
+	$search = null,
+	search = null;
+var focusedElement = null,
+	isOpen = false;
 
 
 function init() {
 	window.addEventListener('keydown', function(ev) {
-		if (ev.shiftKey) {
-			if (ev.keyCode !== 68) return;
+		if (ev.shiftKey && ev.keyCode === 68) {
+			isOpen = true;
+
 			ev.preventDefault();
 
 			focusedElement = document.activeElement;
@@ -52,10 +55,18 @@ function init() {
 				});
 			}
 			$base.appendTo(document.body);
+
 			$search.focus();
+			search.selectionStart = 0;
+			search.selectionEnd = search.value.length;
 			setupListener();
+		} else if (ev.keyCode === 38 && isOpen) {
+			$(document.activeElement).next().focus();
+		} else if (ev.keyCode === 39 && isOpen) {
+			$(document.activeElement).prev().focus();
 		}
 	}, false);
+
 	loadHTML();
 }
 
@@ -64,6 +75,12 @@ function loadHTML() {
 		.done(function(html) {
 			$base = $(html);
 			$search = $base.find('#atami-search');
+			search = $search[0];
+			$base.delegate('*', 'blur', function() {
+				if ($base[0].contains(document.activeElement)) return;
+
+				close();
+			})
 		});
 }
 
@@ -92,14 +109,19 @@ $(init);
  * Util
  */
 
+function close() {
+	focusedElement.focus();
+	$base.remove();
+	isOpen = false;
+}
+
 /**
  * Append cards to parent
  */
 function appendCards(parent, children) {
 	var listener = function() {
 		focusedElement.value = this.src;
-		focusedElement.focus();
-		$base.remove();
+		close();
 	};
 
 	for (var i = 0; i < children.length; i++) {
@@ -113,6 +135,8 @@ function appendCards(parent, children) {
 
 		parent.appendChild(child);
 	}
+
+	parent.firstElementChild.focus();
 }
 
 /**
