@@ -50,13 +50,13 @@ $(init);
 function getImages(query) {
   core('image/search', query, "GET")
     .done(function(json) {
-      var parent = document.querySelector('#parent');
+      var parent = document.querySelector('#atami-parent');
       removeAllChildren(parent);
       appendCards(parent, json);
     }).fail(function(err) {
       console.error(err);
       // TODO: サーバー安定したら削除
-      var parent = document.querySelector('#parent');
+      var parent = document.querySelector('#atami-parent');
       removeAllChildren(parent);
       appendCards(parent, ['http://e-village.main.jp/gazou/image_gazou/shun_0009.jpg', 'http://e-village.main.jp/gazou/image_gazou/shun_0008.jpg']);
     });

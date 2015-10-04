@@ -13,6 +13,7 @@
     "content_scripts": [
     {
       "matches": ["<all_urls>"],
+      "css": ["style.css"],
       "js": ["bower_components/jquery/dist/jquery.js", "bower_components/clipboard/dist/clipboard.min.js", "content_scripts.js"]
     }
   ],
