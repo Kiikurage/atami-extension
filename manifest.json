@@ -20,8 +20,16 @@
   "web_accessible_resources": [
     "*"
   ],
+  "externally_connectable": {
+    "matches": [
+    ]
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
   "permissions": [
     "activeTab",
-    "https://ajax.googleapis.com/"
+    "https://ajax.googleapis.com/",
+    "http://atami.kikurage.xyz/"
   ]
 }

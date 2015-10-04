@@ -6,69 +6,46 @@
 /**
  * Constants
  */
-var ENTRY_POINT='http://atami.kikurage.xyz';
 var $base = null;
+var focusedElement = null;
 
 function init() {
   window.addEventListener('keydown', function(e) {
     if (e.shiftKey) {
       if (e.keyCode === 68) {
-        if (!$base) {
-          loadHTML();
-        }
+        focusedElement = document.activeElement;
+        $base.css({'top': $(focusedElement).offset().top+$(focusedElement).height(), 'left': $(focusedElement).offset().left});
+        $base.appendTo(document.body);
+        setupListener();
       }
     }
-  }, true);
+  }, false);
+  loadHTML();
 };
 
 function loadHTML() {
   $.get(chrome.extension.getURL('form.html'))
     .done(function(html){
       $base = $(html);
-      $base.appendTo(document.body);
-      setupListener();
     });
 };
 
 function setupListener() {
   new Clipboard('.stampImage');
-  document.querySelector('#button').addEventListener('click', function() {
-    var text = document.querySelector("#search").value;
-    getImages({"q": text});
+  document.querySelector('#atami-button').addEventListener('click', function() {
+    var text = document.querySelector("#atami-search").value;
+    // getImages({"q": text});
+    chrome.runtime.sendMessage({'q': text});
   });
 };
 
+chrome.runtime.onMessage.addListener(function(json, sender, sendResponse) {
+  var parent = document.querySelector('#atami-parent');
+  removeAllChildren(parent);
+  appendCards(parent, json);
+});
+
 $(init);
-
-/**********************************************************************
- * API
- */
-
-/**
- * GET /image/search With query
- */
-function getImages(query) {
-  core('image/search', query, "GET")
-    .done(function(json) {
-      var parent = document.querySelector('#atami-parent');
-      removeAllChildren(parent);
-      appendCards(parent, json);
-    }).fail(function(err) {
-      console.error(err);
-      // TODO: サーバー安定したら削除
-      var parent = document.querySelector('#atami-parent');
-      removeAllChildren(parent);
-      appendCards(parent, ['http://e-village.main.jp/gazou/image_gazou/shun_0009.jpg', 'http://e-village.main.jp/gazou/image_gazou/shun_0008.jpg']);
-    });
-}
-
-/**
- * Core of API
- */
-function core(path, query, method) {
-  var url = generateUrl(path, query);
-  return $.get(url)
-}
 
 /**********************************************************************
  * Util
@@ -85,18 +62,14 @@ function appendCards(parent, children) {
     child.src = children[i]["proxiedUrl"];
     child.dataset.clipboardText = children[i]["proxiedUrl"];
     child.setAttribute('tabindex', 0);
+    child.addEventListener('click', function() {
+      focusedElement.value = this.src;
+      focusedElement.focus();
+      $base.remove();
+    });
 
     parent.appendChild(child);
   }
-}
-
-/**
- * Generate full url
- */
-function generateUrl(path, query) {
-  return ENTRY_POINT + '/' + path + '?' + Object.keys(query).map(function(key){
-      return key + '=' + encodeURIComponent(query[key]);
-    }).join('&');
 }
 
 /**
