@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
 
-  "name": "Getting started example",
+  "name": "Atami in laqua.",
   "description": "This extension shows a Google Image search result for the current page",
   "version": "1.0",
 
@@ -10,6 +10,15 @@
     "default_popup": "popup.html",
     "default_title": "Click here!"
   },
+    "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["bower_components/jquery/dist/jquery.js", "bower_components/clipboard/dist/clipboard.min.js", "content_scripts.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    "*"
+  ],
   "permissions": [
     "activeTab",
     "https://ajax.googleapis.com/"
