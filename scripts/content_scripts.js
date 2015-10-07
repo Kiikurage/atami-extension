@@ -78,6 +78,8 @@
 			this.$.search.focus();
 			this.$.search.selectionStart = 0;
 			this.$.search.selectionEnd = this.$.search.value.length;
+		} else if (ev.keyCode === 27) {
+			this.closeBase();
 		}
 	};
 
