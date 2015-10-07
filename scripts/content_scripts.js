@@ -21,6 +21,7 @@
 	ContentScript.prototype.setupListener = function() {
 		window.addEventListener('keydown', this.onWindowKeyDown.bind(this));
 		this.$.form.addEventListener('submit', this.onFormSubmit.bind(this));
+		this.$.submit.addEventListener('click', this.onFormSubmit.bind(this));
 
 		chrome.runtime.onMessage.addListener(this.onMessage.bind(this));
 
@@ -112,6 +113,7 @@
 				self.$.header = $base.querySelector('.header');
 				self.$.search = $base.querySelector('.search');
 				self.$.form = $base.querySelector('.form');
+				self.$.submit = $base.querySelector('.submit');
 				self.$.keywords = $base.querySelector('.search');
 				self.$.container = $base.querySelector('.container');
 			})
