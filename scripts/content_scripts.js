@@ -114,7 +114,13 @@
 	ContentScript.prototype.onImageCacheMessage = function(result, data) {
 		if (result) {
 			var $img = document.getElementById(data.proxiedUrl);
-			$img.src = data.objectUrl;
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', data.objectUrl);
+			xhr.responseType = 'blob';
+			xhr.onload = function() {
+				$img.src = URL.createObjectURL(xhr.response)
+			};
+			xhr.send();
 		} else {
 			console.error('Error in background page');
 			console.error(data);
