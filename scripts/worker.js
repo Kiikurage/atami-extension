@@ -5,6 +5,7 @@
 
 	//--------------------------------------------------------------------------
 	// Initialize
+	var CACHE_SIZE = 50 * 1024 * 1024; //50MB
 
 	function Worker() {
 		this.setupWorker();
@@ -14,6 +15,7 @@
 		global.addEventListener('message', this.onMessage.bind(this), false);
 		global.requestFileSystemSync = global.webkitRequestFileSystemSync ||
 			global.requestFileSystemSync;
+		this.fs = requestFileSystemSync(TEMPORARY, CACHE_SIZE);
 	};
 
 	//--------------------------------------------------------------------------
@@ -22,7 +24,7 @@
 	Worker.prototype.onMessage = function(ev) {
 		console.log(ev.data.url);
 		this.pGetFileEntry(ev.data.url)
-			.catch(this.pWriteFile(ev.data.url))
+			.catch(this.pHandleCacheMissedError(ev.data.url))
 			.then(this.pipeSuccessMessage(ev.data.url, ev.data.tabId))
 			.catch(this.pipeErrorMessage(ev.data.url, ev.data.tabId));
 	};
@@ -60,7 +62,7 @@
 
 	Worker.prototype.pGetFileEntry = function(url) {
 		var filePath = encodeURIComponent(url);
-		var fs = requestFileSystemSync(TEMPORARY, 1024 * 1024);
+		var fs = this.fs;
 		return new Promise(function(resolve) {
 			console.log('in promise of pGetFileEntry');
 			var fileEntry = fs.root.getFile(filePath, {
@@ -70,21 +72,30 @@
 		});
 	};
 
+	Worker.prototype.pHandleCacheMissedError = function(url) {
+		return function(err) {
+			console.info('Cache is missed!');
+			console.info(err);
+
+			return this.pWriteFile(url);
+		}.bind(this);
+	};
+
 	Worker.prototype.pWriteFile = function(url) {
 		var filePath = encodeURIComponent(url);
-		var fs = requestFileSystemSync(TEMPORARY, 1024 * 1024);
-		return new Promise(function(resolve) {
-			this.pFetchImageWithUrl(url)
-				.then(function(blob) {
-					console.log('in promise of pWriteFile');
-					var fileEntry = fs.root.getFile(filePath, {
-						create: true,
-						exclusive: false
-					});
-					fileEntry.createWriter().write(blob);
-					resolve(fileEntry.file());
+		var fs = this.fs;
+
+		return this.pFetchImageWithUrl(url)
+			.then(function(blob) {
+				console.log('in promise of pWriteFile');
+				var fileEntry = fs.root.getFile(filePath, {
+					create: true,
+					exclusive: false
 				});
-		}.bind(this));
+				fileEntry.createWriter().write(blob);
+
+				return fileEntry.file();
+			});
 	};
 
 	//--------------------------------------------------------------------------
