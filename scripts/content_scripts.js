@@ -26,6 +26,7 @@
 		chrome.runtime.onMessage.addListener(this.onMessage.bind(this));
 
 		this.addMessageListener('/image/search', this.onImageSearchMessage.bind(this));
+		this.addMessageListener('/image/cache', this.onImageCacheMessage.bind(this));
 	};
 
 	ContentScript.prototype.onMessage = function(message) {
@@ -103,6 +104,29 @@
 		}
 	};
 
+	ContentScript.prototype.requestImageCache = function(url) {
+		chrome.runtime.sendMessage({
+			type: '/image/cache',
+			data: url
+		});
+	};
+
+	ContentScript.prototype.onImageCacheMessage = function(result, data) {
+		if (result) {
+			var $img = document.getElementById(data.proxiedUrl);
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', data.objectUrl);
+			xhr.responseType = 'blob';
+			xhr.onload = function() {
+				$img.src = URL.createObjectURL(xhr.response);
+			};
+			xhr.send();
+		} else {
+			console.error('Error in background page');
+			console.error(data);
+		}
+	};
+
 	//--------------------------------------------------------------------------
 	// UI management
 
@@ -126,7 +150,7 @@
 
 	ContentScript.prototype.appendItems = function($parent, children) {
 		var listener = function(ev) {
-			this.$.originalFocusedElement.value = ev.target.src;
+			this.$.originalFocusedElement.value = ev.target.dataset.url;
 			this.closeBase();
 		}.bind(this);
 
@@ -134,10 +158,12 @@
 			var $child = document.createElement('img');
 
 			$child.classList.add('stampImage');
-			$child.src = children[i].proxiedUrl;
+			$child.id = children[i].url;
+			$child.dataset.url = children[i].proxiedUrl;
 			$child.dataset.clipboardText = children[i].proxiedUrl;
 			$child.setAttribute('tabindex', 0);
 			$child.addEventListener('click', listener);
+			this.requestImageCache(children[i].url);
 
 			$parent.appendChild($child);
 		}
@@ -173,4 +199,4 @@
 	}
 
 	global.atami = new ContentScript();
-})(window);
+})(self);
