@@ -26,6 +26,7 @@
 		chrome.runtime.onMessage.addListener(this.onMessage.bind(this));
 
 		this.addMessageListener('/image/search', this.onImageSearchMessage.bind(this));
+		this.addMessageListener('/image/cache', this.onImageCacheMessage.bind(this));
 	};
 
 	ContentScript.prototype.onMessage = function(message) {
@@ -103,6 +104,23 @@
 		}
 	};
 
+	ContentScript.prototype.requestImageCache = function(url) {
+		chrome.runtime.sendMessage({
+			type: '/image/cache',
+			data: url
+		});
+	}
+
+	ContentScript.prototype.onImageCacheMessage = function(result, data) {
+		if (result) {
+			var $img = document.getElementById(data.proxiedUrl);
+			$img.src = data.objectUrl;
+		} else {
+			console.error('Error in background page');
+			console.error(data);
+		}
+	}
+
 	//--------------------------------------------------------------------------
 	// UI management
 
@@ -134,10 +152,11 @@
 			var $child = document.createElement('img');
 
 			$child.classList.add('stampImage');
-			$child.src = children[i].proxiedUrl;
+			$child.id = children[i].url;
 			$child.dataset.clipboardText = children[i].proxiedUrl;
 			$child.setAttribute('tabindex', 0);
 			$child.addEventListener('click', listener);
+			this.requestImageCache(children[i].url);
 
 			$parent.appendChild($child);
 		}
@@ -173,4 +192,4 @@
 	}
 
 	global.atami = new ContentScript();
-})(window);
+})(self);

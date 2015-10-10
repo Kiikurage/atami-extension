@@ -10,13 +10,17 @@
 
 	function BackgroundPage() {
 		this._messageListeners = null;
+		this._worker = null;
 		this.setupListener();
 	}
 
 	BackgroundPage.prototype.setupListener = function() {
-		this._messageListeners = [];
+		this._messageListeners = {};
+		this._worker = new Worker('/scripts/worker.js');
 		chrome.runtime.onMessage.addListener(this.onMessage.bind(this));
 		this.addMessageListener('/image/search', this.onImageSearchMessage.bind(this));
+		this.addMessageListener('/image/cache', this.onImageCacheMessage.bind(this));
+		this._worker.addEventListener('message', this.onMessageFromWoker.bind(this));
 	};
 
 	//--------------------------------------------------------------------------
@@ -33,9 +37,26 @@
 		listener(sender.tab.id, data, res);
 	};
 
+	BackgroundPage.prototype.onMessageFromWoker = function(ev) {
+		var	result = ev.data.result,
+			data = ev.data.data,
+			tabId = ev.data.tabId;
+
+		console.log('message from worker.js');
+		console.log(data);
+		chrome.tabs.sendMessage(tabId, {
+			type: '/image/cache',
+			result: result,
+			data: data
+		});
+	}
+
 	BackgroundPage.prototype.addMessageListener = function(type, listener) {
 		this._messageListeners[type] = listener;
 	};
+
+	//--------------------------------------------------------------------------
+	// Pipe
 
 	BackgroundPage.prototype.pipeSuccessMessage = function(type, tabId) {
 		return function(data) {
@@ -55,6 +76,13 @@
 				data: err
 			});
 		};
+	};
+
+	//--------------------------------------------------------------------------
+	// Request cache of image
+
+	BackgroundPage.prototype.onImageCacheMessage = function(tabId, url) {
+		this._worker.postMessage({url: url, tabId: tabId});
 	};
 
 	//--------------------------------------------------------------------------
@@ -82,4 +110,4 @@
 	}
 
 	global.BackgroundPage = new BackgroundPage();
-})(window);
+})(self);
