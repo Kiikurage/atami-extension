@@ -109,7 +109,7 @@
 			type: '/image/cache',
 			data: url
 		});
-	}
+	};
 
 	ContentScript.prototype.onImageCacheMessage = function(result, data) {
 		if (result) {
@@ -118,14 +118,14 @@
 			xhr.open('GET', data.objectUrl);
 			xhr.responseType = 'blob';
 			xhr.onload = function() {
-				$img.src = URL.createObjectURL(xhr.response)
+				$img.src = URL.createObjectURL(xhr.response);
 			};
 			xhr.send();
 		} else {
 			console.error('Error in background page');
 			console.error(data);
 		}
-	}
+	};
 
 	//--------------------------------------------------------------------------
 	// UI management

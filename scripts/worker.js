@@ -1,3 +1,4 @@
+/* global requestFileSystemSync, TEMPORARY */
 
 (function(global) {
 	'use strict';
@@ -7,13 +8,13 @@
 
 	function Worker() {
 		this.setupWorker();
-	};
+	}
 
 	Worker.prototype.setupWorker = function() {
 		global.addEventListener('message', this.onMessage.bind(this), false);
 		global.requestFileSystemSync = global.webkitRequestFileSystemSync ||
-																	global.requestFileSystemSync;
-  }
+			global.requestFileSystemSync;
+	};
 
 	//--------------------------------------------------------------------------
 	// Listener
@@ -59,25 +60,30 @@
 
 	Worker.prototype.pGetFileEntry = function(url) {
 		var filePath = encodeURIComponent(url);
-		var fs = requestFileSystemSync(TEMPORARY, 1024*1024);
+		var fs = requestFileSystemSync(TEMPORARY, 1024 * 1024);
 		return new Promise(function(resolve) {
 			console.log('in promise of pGetFileEntry');
-			var fileEntry = fs.root.getFile(filePath, {create: false});
+			var fileEntry = fs.root.getFile(filePath, {
+				create: false
+			});
 			resolve(fileEntry.file());
 		});
 	};
 
 	Worker.prototype.pWriteFile = function(url) {
 		var filePath = encodeURIComponent(url);
-		var fs = requestFileSystemSync(TEMPORARY, 1024*1024);
-		return new Promise(function(resolve, reject) {
+		var fs = requestFileSystemSync(TEMPORARY, 1024 * 1024);
+		return new Promise(function(resolve) {
 			this.pFetchImageWithUrl(url)
-			.then(function(blob) {
-				console.log('in promise of pWriteFile');
-				var fileEntry = fs.root.getFile(filePath, {create: true, exclusive: false});
-				fileEntry.createWriter().write(blob);
-				resolve(fileEntry.file());
-			});
+				.then(function(blob) {
+					console.log('in promise of pWriteFile');
+					var fileEntry = fs.root.getFile(filePath, {
+						create: true,
+						exclusive: false
+					});
+					fileEntry.createWriter().write(blob);
+					resolve(fileEntry.file());
+				});
 		}.bind(this));
 	};
 
@@ -86,18 +92,13 @@
 
 	Worker.prototype.pFetchImageWithUrl = function(url) {
 		return fetch(url)
-		.then(function(res) {
-			return res.blob();
-		});
+			.then(function(res) {
+				return res.blob();
+			});
 	};
 
 	//--------------------------------------------------------------------------
 	// Private
-
-	function errorHandler(err) {
-		console.error('ERROR has occured: ' + err);
-		postMessage('ERROR: ' + err);
-	};
 
 	global.worker = new Worker();
 })(self);

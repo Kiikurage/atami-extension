@@ -38,7 +38,7 @@
 	};
 
 	BackgroundPage.prototype.onMessageFromWoker = function(ev) {
-		var	result = ev.data.result,
+		var result = ev.data.result,
 			data = ev.data.data,
 			tabId = ev.data.tabId;
 
@@ -49,7 +49,7 @@
 			result: result,
 			data: data
 		});
-	}
+	};
 
 	BackgroundPage.prototype.addMessageListener = function(type, listener) {
 		this._messageListeners[type] = listener;
@@ -82,7 +82,10 @@
 	// Request cache of image
 
 	BackgroundPage.prototype.onImageCacheMessage = function(tabId, url) {
-		this._worker.postMessage({url: url, tabId: tabId});
+		this._worker.postMessage({
+			url: url,
+			tabId: tabId
+		});
 	};
 
 	//--------------------------------------------------------------------------
