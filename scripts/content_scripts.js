@@ -109,17 +109,23 @@
 			type: '/image/cache',
 			data: url
 		});
-	}
+	};
 
 	ContentScript.prototype.onImageCacheMessage = function(result, data) {
 		if (result) {
 			var $img = document.getElementById(data.proxiedUrl);
-			$img.src = data.objectUrl;
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', data.objectUrl);
+			xhr.responseType = 'blob';
+			xhr.onload = function() {
+				$img.src = URL.createObjectURL(xhr.response);
+			};
+			xhr.send();
 		} else {
 			console.error('Error in background page');
 			console.error(data);
 		}
-	}
+	};
 
 	//--------------------------------------------------------------------------
 	// UI management
@@ -144,7 +150,7 @@
 
 	ContentScript.prototype.appendItems = function($parent, children) {
 		var listener = function(ev) {
-			this.$.originalFocusedElement.value = ev.target.src;
+			this.$.originalFocusedElement.value = ev.target.dataset.url;
 			this.closeBase();
 		}.bind(this);
 
@@ -153,6 +159,7 @@
 
 			$child.classList.add('stampImage');
 			$child.id = children[i].url;
+			$child.dataset.url = children[i].proxiedUrl;
 			$child.dataset.clipboardText = children[i].proxiedUrl;
 			$child.setAttribute('tabindex', 0);
 			$child.addEventListener('click', listener);
