@@ -150,7 +150,7 @@
 
 	ContentScript.prototype.appendItems = function($parent, children) {
 		var listener = function(ev) {
-			this.$.originalFocusedElement.value = ev.target.src;
+			this.$.originalFocusedElement.value = ev.target.dataset.url;
 			this.closeBase();
 		}.bind(this);
 
@@ -159,6 +159,7 @@
 
 			$child.classList.add('stampImage');
 			$child.id = children[i].url;
+			$child.dataset.url = children[i].proxiedUrl;
 			$child.dataset.clipboardText = children[i].proxiedUrl;
 			$child.setAttribute('tabindex', 0);
 			$child.addEventListener('click', listener);

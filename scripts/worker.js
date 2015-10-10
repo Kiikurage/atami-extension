@@ -22,94 +22,103 @@
 	// Listener
 
 	Worker.prototype.onMessage = function(ev) {
-		console.log(ev.data.url);
-		this.pGetFileEntry(ev.data.url)
-			.catch(this.pHandleCacheMissedError(ev.data.url))
-			.then(this.pipeSuccessMessage(ev.data.url, ev.data.tabId))
-			.catch(this.pipeErrorMessage(ev.data.url, ev.data.tabId));
+		var url = ev.data.url;
+
+		console.log(url);
+
+		this.pFindOrCreateCache(url)
+			.then(this.formatResponseData.bind(this, url))
+			.then(this.pipeSuccessMessage.bind(this, url, ev.data.tabId))
+			.catch(this.pipeErrorMessage.bind(this, url, ev.data.tabId));
 	};
 
 	//--------------------------------------------------------------------------
 	// Pipe
 
-	Worker.prototype.pipeSuccessMessage = function(url, tabId) {
-		return function(file) {
-			console.log('pipeSuccessMessage');
-			global.postMessage({
-				result: true,
-				data: {
-					objectUrl: URL.createObjectURL(file),
-					proxiedUrl: url
-				},
-				tabId: tabId
-			});
-		};
+	Worker.prototype.pipeSuccessMessage = function(url, tabId, data) {
+		console.log('pipeSuccessMessage');
+		global.postMessage({
+			result: true,
+			data: data,
+			tabId: tabId
+		});
 	};
 
-	Worker.prototype.pipeErrorMessage = function(url, tabId) {
-		return function(err) {
-			console.log('pipeErrorMessage');
-			global.postMessage({
-				result: false,
-				data: err,
-				tabId: tabId
-			});
+	Worker.prototype.pipeErrorMessage = function(url, tabId, err) {
+		console.log('pipeErrorMessage');
+		global.postMessage({
+			result: false,
+			data: err,
+			tabId: tabId
+		});
+	};
+
+	Worker.prototype.formatResponseData = function(url, blob) {
+		return {
+			objectUrl: URL.createObjectURL(blob),
+			proxiedUrl: url
 		};
 	};
 
 	//--------------------------------------------------------------------------
 	// FileSystem API
 
-	Worker.prototype.pGetFileEntry = function(url) {
-		var filePath = encodeURIComponent(url);
+	Worker.prototype.pFindOrCreateCache = function(url) {
+		return this.pReadFile(url2filePath(url))
+			.catch(this.pCreateCache.bind(this, url));
+	};
+
+	Worker.prototype.pReadFile = function(filePath) {
 		var fs = this.fs;
+
 		return new Promise(function(resolve) {
-			console.log('in promise of pGetFileEntry');
-			var fileEntry = fs.root.getFile(filePath, {
-				create: false
-			});
-			resolve(fileEntry.file());
+			var blob = fs.root
+				.getFile(filePath, {
+					create: false
+				})
+				.file();
+
+			resolve(blob);
 		});
 	};
 
-	Worker.prototype.pHandleCacheMissedError = function(url) {
-		return function(err) {
-			console.info('Cache is missed!');
-			console.info(err);
-
-			return this.pWriteFile(url);
-		}.bind(this);
-	};
-
-	Worker.prototype.pWriteFile = function(url) {
-		var filePath = encodeURIComponent(url);
+	Worker.prototype.pWriteFile = function(filePath, blob) {
 		var fs = this.fs;
 
-		return this.pFetchImageWithUrl(url)
-			.then(function(blob) {
-				console.log('in promise of pWriteFile');
-				var fileEntry = fs.root.getFile(filePath, {
+		return new Promise(function(resolve) {
+			fs.root
+				.getFile(filePath, {
 					create: true,
 					exclusive: false
-				});
-				fileEntry.createWriter().write(blob);
+				})
+				.createWriter().write(blob);
 
-				return fileEntry.file();
-			});
+			resolve(blob);
+		});
+	};
+
+	Worker.prototype.pCreateCache = function(url) {
+		return this.pFetchImageWithUrl(url)
+			.then(this.pWriteFile.bind(this, url2filePath(url)));
 	};
 
 	//--------------------------------------------------------------------------
 	// Fetch
 
 	Worker.prototype.pFetchImageWithUrl = function(url) {
-		return fetch(url)
-			.then(function(res) {
-				return res.blob();
-			});
+		return fetch(url).then(res2blob);
 	};
 
 	//--------------------------------------------------------------------------
 	// Private
+
+	function res2blob(res) {
+		return res.blob();
+	}
+
+	function url2filePath(url) {
+		return encodeURIComponent(url);
+	}
 
 	global.worker = new Worker();
 })(self);
