@@ -1,0 +1,33 @@
+{
+	"name": "atami-extension",
+	"version": "0.0.1",
+	"description": "Atami-Chrome-Extension",
+	"scripts": {},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Kiikurage/atami-extension.git"
+	},
+	"author": [{
+		"name": "Kikurage",
+		"email": "y.kikura@gmail.com"
+	}],
+	"dependencies": {
+		"babel-core": "^6.3.21",
+		"babel-loader": "^6.2.2",
+		"babel-preset-es2015": "^6.3.13",
+		"babel-preset-stage-0": "^6.3.13",
+		"eslint": "^1.8.0",
+		"eslint-plugin-html": "^1.1.0",
+		"gulp": "^3.9.1",
+		"gulp-autoprefixer": "^3.1.0",
+		"gulp-babel": "^6.1.2",
+		"gulp-clean": "^0.3.1",
+		"gulp-livereload": "^3.8.1",
+		"gulp-load-plugins": "^1.2.0",
+		"gulp-sass": "^2.2.0",
+		"gulp-webpack": "^1.5.0",
+		"node-notifier": "^4.5.0",
+		"run-sequence": "^1.1.5",
+		"vinyl-named": "^1.1.0"
+	}
+}

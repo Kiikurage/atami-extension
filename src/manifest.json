@@ -1,0 +1,31 @@
+{
+	"manifest_version": 2,
+
+	"name": "Atami forked by Kikurage",
+	"description": "",
+	"version": "0.0.1",
+
+	"content_scripts": [{
+		"matches": [
+			"<all_urls>"
+		],
+		"css": [
+			"style.css"
+		],
+		"js": [
+			"content_script.js"
+		]
+	}],
+	"web_accessible_resources": [
+		"*"
+	],
+	"background": {
+		"scripts": [
+			"background.js"
+		]
+	},
+	"permissions": [
+		"activeTab",
+		"storage"
+	]
+}
